@@ -13,7 +13,7 @@ class NeuroTestClass:
     self.LearningCurve = learningcurve
     self.NumofArray = numofarray
     self.AddToArray()
-    self.Buttons[random.randint(0,self.NumofArray-1)] = 1
+    self.Buttons[self.PickRandomArrayNumber()] = 1
     self.SetDefaultWeights()
     self.CheckWeights()
     
@@ -23,29 +23,48 @@ class NeuroTestClass:
       self.Weights.append(0)
    
    def SetDefaultWeights(self):
+    TotalWeightings = 0
     for x in range(self.NumofArray):
-      self.Weights[x] = round(1/self.NumofArray,2)
+      self.Weights[x] = round(1/self.NumofArray,2) * 100
+      TotalWeightings += self.Weights[x] 
+      '''print("Weights:")
+      print(self.Weights[x])
+      print(TotalWeightings)'''
 
    def CheckWeights(self):
     TotalWeight = 0
+    MissingWeight = 0
     for x in range(self.NumofArray):
       TotalWeight += self.Weights[x]
-    if TotalWeight != 1:
-     TotalWeight = round(TotalWeight - 1,2)
-     TempNum = random.randint(0,self.NumofArray) -1
-     print(TempNum)
-     self.Weights[TempNum] -= TotalWeight
-     self.CheckWeights()
+    if TotalWeight != 100:
+      MissingWeight = 100 - TotalWeight
+      self.Weights[self.PickRandomArrayNumber()] += MissingWeight
+      '''self.ShowWeightValues()'''
+  
+   def CheckMinMaxValues(self):
+     for x in range(self.NumofArray):
+       if self.Weights[x] > 100:
+         self.Weights[x] = 100
+       if self.Weights[x] < 0:
+         self.Weights[x] = 0
+      
+   def PickRandomArrayNumber(self):
+     return random.randint(0,self.NumofArray) -1
 
    def ShowWeightValues(self):
       print("Weightings: ")
       for x in range(self.NumofArray):
-        print(self.Weights[x] * 100)
-
+        print(self.Weights[x])
+   def ShowTotalWeight(self):
+     TotalWeight = 0;
+     for x in range(self.NumofArray):
+       TotalWeight += self.Weights[x] 
+     print(TotalWeight)
    def ShowButtons(self):
       print("Showing right button: ")
       for x in range(self.NumofArray):
         print(self.Buttons[x])
+        
    def ShowWinLoss(self):
       print("Wins:")
       print(self.FoundButtonCount)
@@ -56,21 +75,21 @@ class NeuroTestClass:
       test = 0
       for x in range(self.NumofArray):
         test += self.Weights[x]
-      print(test * 100)
+      print(test)
 
    def ChooseButton(self):
 
     CalcNumber = 0
-    ChoosenNumber = random.randint(0,100)
+    ChoosenNumber = random.randint(1,100)
 
     '''This is just a quick check to see if which button the AI chooses. The for loop adds the number of weights then checks if it's the calculated number is more than the chosen number. if the number is more than the chosen number the program now which button is press by what x equals'''
 
     for x in range(self.NumofArray):
-      CalcNumber += self.Weights[0] * 100
+      CalcNumber += self.Weights[0]
       if ChoosenNumber <= CalcNumber:
         self.ChoosenButton = x
-        print(ChoosenNumber)
-        print(self.ChoosenButton)
+        '''print(ChoosenNumber)
+        print(self.ChoosenButton)'''
         self.CheckRightButton()
         return
   
@@ -83,14 +102,17 @@ class NeuroTestClass:
       print("Button not found")
       self.NoFoundButtonCount += 1
       self.Weights[self.ChoosenButton] -= self.LearningCurve
+    self.CheckMinMaxValues()
     self.CheckWeights()
        
     
 
 
-Testing = NeuroTestClass(4, .01)
-for x in range(30000):
+Testing = NeuroTestClass(4, 3)
+for x in range(100):
   Testing.ChooseButton()
+  Testing.ShowTotalWeight()
+
 Testing.ShowWeightValues()
 Testing.ShowButtons()
 Testing.ShowWinLoss()
