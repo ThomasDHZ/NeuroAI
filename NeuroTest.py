@@ -22,13 +22,16 @@ class NeuroTestClass:
     for x in range(self.NumofArray):
       self.Buttons.append(0)
       self.Weights.append(0)
-   
+
    def SetDefaultWeights(self):
     TotalWeightings = 0
     for x in range(self.NumofArray):
       self.Weights[x] = round(1/self.NumofArray,2) * 100
       TotalWeightings += self.Weights[x] 
     self.CheckWeights()
+   
+   def PickRandomArrayNumber(self):
+     return random.randint(0,self.NumofArray) -1
 
    def CheckWeights(self):
     TotalWeight = 0
@@ -58,34 +61,6 @@ class NeuroTestClass:
       if self.Weights[x] != BaseWeight:
         WeightsEqual = 0
     return WeightsEqual
-
-   def PickRandomArrayNumber(self):
-     return random.randint(0,self.NumofArray) -1
-
-   def ShowWeightValues(self):
-      TotalWeight = 0
-      print("\nWeights: ")
-      for x in range(self.NumofArray):
-        TotalWeight += self.Weights[x]
-        print(self.Weights[x])
-      print("Total Weight: " + str(TotalWeight))
-
-   def ShowButtons(self):
-      for x in range(self.NumofArray):
-        if self.Buttons[x] == 1:
-          print("Right button: " + str(self.Buttons[x]))
-
-   def ShowCompletedRuns(self):
-     print(self.CompletedRuns)
-
-   def ShowWinLoss(self):
-      print("\n\nResults: \n")
-      print("Wins: " + str(self.FoundButtonCount))
-      print("Lose: " + str(self.NoFoundButtonCount))
-      print("AI Forgot to press button: " + str(self.ButtonNotPressed))
-   
-   def TryNextOne(self):
-     input("Press enter:")
 
    def GetTotalWeight(self):
     TotalWeight = 0;
@@ -142,6 +117,7 @@ class NeuroTestClass:
             SortFlag = 1
       if SortFlag == 0:
         return SortedArrayLocation
+        
    def AddWeight(self, Weight):
     DividedWeight = round(Weight/self.NumofArray,0)
     RemainderWeight = Weight%self.NumofArray
@@ -181,6 +157,34 @@ class NeuroTestClass:
         if HighestNumber == self.Weights[ArrayLocations[x]]:
           HighestArrayLocations.append(ArrayLocations[x])
       self.Weights[ArrayLocations[random.randint(0,len(HighestArrayLocations) - 1)]] -= WeightDiffrence
+   
+   def CheckForBelowZero(self):
+     for x in range(self.NumofArray):
+       if self.Weights[x] < 0:
+         BelowZeroNum = self.Weights[x]
+         self.BelowZeroNumber(self.Weights[x])
+
+    
+   def BelowZeroNumber(self, BadWeight):
+      SortedArrayLocation = self.SortByGreatest()
+      self.Weights[SortedArrayLocation[0]] -= abs(BadWeight)
+      for x in range(self.NumofArray):
+        if BadWeight == self.Weights[x]:
+          self.Weights[x] += abs(BadWeight)  
+    
+   def CheckForAboveLimit(self):
+     for x in range(self.NumofArray):
+       if self.Weights[x] > 100:
+         self.AboveLimitNumber(self.Weights[x] - 100)
+
+
+   def AboveLimitNumber(self, BadWeight):
+      SortedArrayLocation = self.SortByLeast()
+      self.Weights[SortedArrayLocation[0]] += abs(BadWeight)
+      for x in range(self.NumofArray):
+        if BadWeight + 100 == self.Weights[x]:
+          self.Weights[x] -= abs(BadWeight)
+ 
 
    def ChooseButton(self):
     CalcNumber = 0
@@ -209,11 +213,37 @@ class NeuroTestClass:
       self.NoFoundButtonCount += 1
       self.Weights[self.ChoosenButton] -= self.LearningCurve
     self.AddWeight(0)
-    self.CheckMinMaxValues()
+    self.CheckForAboveLimit()
+    self.CheckForBelowZero()
+    self.ForceEqualWeight()
     self.ShowWeightValues()
-       
-Testing = NeuroTestClass(4, 5)
-for x in range(100):
+    if self.GetTotalWeight() < 100:
+      input("asdf")
+
+   def ShowWeightValues(self):
+      TotalWeight = 0
+      print("\nWeights: ")
+      for x in range(self.NumofArray):
+        TotalWeight += self.Weights[x]
+      print(self.Weights)
+      print("Total Weight: " + str(TotalWeight))
+
+   def ShowButtons(self):
+      for x in range(self.NumofArray):
+        if self.Buttons[x] == 1:
+          print("Right button: " + str(self.Buttons[x]))
+
+   def ShowCompletedRuns(self):
+     print(self.CompletedRuns)
+
+   def ShowWinLoss(self):
+      print("\n\nResults: \n")
+      print("Wins: " + str(self.FoundButtonCount))
+      print("Lose: " + str(self.NoFoundButtonCount))
+      print("AI Forgot to press button: " + str(self.ButtonNotPressed)) 
+
+Testing = NeuroTestClass(4,  10)
+for x in range(1000):
   print("\nRun Number: " + str(x))
   Testing.ChooseButton()
 
@@ -222,5 +252,3 @@ Testing.ShowWeightValues()
 Testing.ShowButtons()
 Testing.ShowWinLoss()
 
-'''Todo some weights are still going below 0
-   Todo sometimes things recurring over 1000 times'''
